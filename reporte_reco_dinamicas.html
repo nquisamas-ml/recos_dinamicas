@@ -217,8 +217,8 @@
 <div class="chart-tooltip" id="chart-tooltip"></div>
 
 <script>
-var DATA_URL_1 = 'https://nquisamas-ml.github.io/recos_dinamicas/data/reco_dinamicas_data.json';
-var DATA_URL_2 = 'https://nquisamas-ml.github.io/recos_dinamicas/data/reco_dinamicas_cluster.json';
+var rows1 = __RECO_DATA__;
+var rows2 = __CLUSTER_DATA__;
 var MAIN_CLUSTERS = ['Mature', 'Emerging', 'MeliPro', 'In professionalization'];
 
 var CLUSTER_COLORS = {
@@ -607,17 +607,9 @@ function renderSection4() {
   updateS4Extras(keys, {tratIr:tratIr,ctrlIr:ctrlIr,tratCtr:tratCtr,ctrlCtr:ctrlCtr,tratCvr:tratCvr,ctrlCvr:ctrlCvr,tIrN:tIrN,tIrD:tIrD,cIrN:cIrN,cIrD:cIrD,tCtrN:tCtrN,tCtrD:tCtrD,cCtrN:cCtrN,cCtrD:cCtrD,tCvrN:tCvrN,tCvrD:tCvrD,cCvrN:cCvrN,cCvrD:cCvrD});
 }
 
-// ── MAIN: fetch ambos JSONs en paralelo ───────────────────────────────────────
-async function render() {
+// ── MAIN: renderizado con datos embebidos ────────────────────────────────────
+function render() {
   try {
-    var [resp1, resp2] = await Promise.all([fetch(DATA_URL_1), fetch(DATA_URL_2)]);
-    if (!resp1.ok) throw new Error('JSON 1: HTTP ' + resp1.status);
-    if (!resp2.ok) throw new Error('JSON 2: HTTP ' + resp2.status);
-    var text1 = await resp1.text();
-    var text2 = await resp2.text();
-    var rows1 = text1.trim().split('\n').map(function(l) { return JSON.parse(l); });
-    var rows2 = text2.trim().split('\n').map(function(l) { return JSON.parse(l); });
-
     var availableClusters = [], seen = {};
     rows1.forEach(function(r) { if (r.sub_cluster !== 'TOTAL' && r.sellers > 10 && !seen[r.sub_cluster]) { availableClusters.push(r.sub_cluster); seen[r.sub_cluster] = true; } });
     var clusters = MAIN_CLUSTERS.filter(function(c) { return availableClusters.indexOf(c) !== -1; });
@@ -652,7 +644,7 @@ async function render() {
       'Grupo Tratamiento (TESTING_FLG=TRUE) &nbsp;|&nbsp; Panel balanceado';
 
   } catch (err) {
-    document.getElementById('loading').innerHTML = '<div class="error-msg">Error cargando datos: ' + err.message + '<br><small>' + DATA_URL_1 + '</small></div>';
+    document.getElementById('loading').innerHTML = '<div class="error-msg">Error cargando datos: ' + err.message + '</div>';
   }
 }
 
