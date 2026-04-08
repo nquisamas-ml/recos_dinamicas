@@ -5,7 +5,7 @@
 {"periodo": "POST", "sub_cluster": "MeliPro", "sellers": 1030, "ir_pct": 2.92, "ctr_pct": 0.36, "cvr_pct": 0.0, "updated_at": "2026-04-07"}
 {"periodo": "POST", "sub_cluster": "Seasonal", "sellers": 3, "ir_pct": 11.54, "ctr_pct": 7.69, "cvr_pct": 0.0, "updated_at": "2026-04-07"}
 {"periodo": "POST", "sub_cluster": "Starter/Newbie", "sellers": 9, "ir_pct": 0.54, "ctr_pct": 0.0, "cvr_pct": null, "updated_at": "2026-04-07"}
-{"periodo": "POST", "sub_cluster": "TOTAL", "sellers": 5803, "ir_pct": 3.62, "ctr_pct": 0.7, "cvr_pct": 0.32, "updated_at": "2026-04-07"}
+{"periodo": "POST", "sub_cluster": "TOTAL", "sellers": 5401, "ir_pct": 3.62, "ctr_pct": 0.7, "cvr_pct": 0.32, "updated_at": "2026-04-07"}
 {"periodo": "POST", "sub_cluster": "WithoutCluster", "sellers": 1, "ir_pct": 4.55, "ctr_pct": 0.0, "cvr_pct": null, "updated_at": "2026-04-07"}
 {"periodo": "PRE", "sub_cluster": "Churn", "sellers": 6, "ir_pct": 6.45, "ctr_pct": 0.0, "cvr_pct": null, "updated_at": "2026-04-07"}
 {"periodo": "PRE", "sub_cluster": "Emerging", "sellers": 2288, "ir_pct": 3.03, "ctr_pct": 0.56, "cvr_pct": 14.4, "updated_at": "2026-04-07"}
@@ -15,5 +15,5 @@
 {"periodo": "PRE", "sub_cluster": "MeliPro", "sellers": 1018, "ir_pct": 2.36, "ctr_pct": 1.14, "cvr_pct": 0.0, "updated_at": "2026-04-07"}
 {"periodo": "PRE", "sub_cluster": "Seasonal", "sellers": 20, "ir_pct": 8.57, "ctr_pct": 4.26, "cvr_pct": 0.0, "updated_at": "2026-04-07"}
 {"periodo": "PRE", "sub_cluster": "Starter/Newbie", "sellers": 23, "ir_pct": 1.15, "ctr_pct": 0.4, "cvr_pct": 0.0, "updated_at": "2026-04-07"}
-{"periodo": "PRE", "sub_cluster": "TOTAL", "sellers": 6159, "ir_pct": 2.92, "ctr_pct": 0.66, "cvr_pct": 13.06, "updated_at": "2026-04-07"}
+{"periodo": "PRE", "sub_cluster": "TOTAL", "sellers": 5401, "ir_pct": 2.92, "ctr_pct": 0.66, "cvr_pct": 13.06, "updated_at": "2026-04-07"}
 {"periodo": "PRE", "sub_cluster": "WithoutCluster", "sellers": 8, "ir_pct": 8.44, "ctr_pct": 0.0, "cvr_pct": null, "updated_at": "2026-04-07"}
