@@ -164,16 +164,43 @@
     .error-msg { text-align: center; padding: 40px; color: #c0392b; background: #fdecea; border-radius: 8px; margin: 20px 0; }
 
     footer { text-align: center; padding: 24px 32px; color: #aaa; font-size: 12px; border-top: 1px solid #e8eaf0; margin-top: 16px; }
-  </style>
+  
+/* ── TABS ── */
+.tab-bar {
+  display: flex; gap: 0; background: #12122a;
+  padding: 0 48px; border-bottom: 2px solid #2a2a4a;
+}
+.tab-btn {
+  padding: 14px 24px; font-size: 13px; font-weight: 600;
+  color: #aab4c8; background: none; border: none;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  cursor: pointer; transition: all .15s; letter-spacing: .02em;
+}
+.tab-btn:hover { color: #fff; }
+.tab-btn.active { color: #ffe600; border-bottom-color: #ffe600; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+/* Estilos extras para tab Resultados */
+.insight-neg { background: #fdecea; border-left: 3px solid #c0392b; }
+.insight-neg strong { color: #c0392b; }
+
+</style>
 </head>
 <body>
 
 <header>
+  <div class="badge">Experimento en produccion</div>
   <h1>Recomendaciones Dinamicas — Performance post-lanzamiento (desde 17-Mar-2026)</h1>
   <p>Tabla fuente: <code>meli-sbox.SUPPLYDATA.AB_TESTING_RECO_DINAMICAS_SUMARIZADA</code> &nbsp;|&nbsp; Grupo: Tratamiento (TESTING_FLG=TRUE) &nbsp;|&nbsp; Panel balanceado</p>
   <div class="update-date" id="header-date">Cargando fecha de actualizacion...</div>
 </header>
 
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('performance')">Performance</button>
+  <button class="tab-btn" onclick="switchTab('resultados')">Resultados</button>
+</div>
+
+<div id="tab-performance" class="tab-panel active">
 <main>
   <div id="loading">
     <div class="spinner"></div><br>Cargando datos...
@@ -209,6 +236,179 @@
   </div>
 </main>
 
+</main>
+</div><!-- /tab-performance -->
+
+<div id="tab-resultados" class="tab-panel">
+<main style="max-width:1100px; margin:0 auto; padding:40px 32px;">
+
+  <!-- SECCIÓN RECAP DEL ANÁLISIS -->
+  <section>
+    <h2>Recap del análisis completo</h2>
+    <p class="section-intro">Setup: encendido 17-Mar-2026 | <strong>Ventana simétrica: PRE 4-Feb–16-Mar (41 días) / POST 17-Mar–26-Apr (41 días)</strong> | 5,401 sellers en panel balanceado (TESTING_FLG=TRUE) | Tabla sumaria: <code>meli-sbox.SUPPLYDATA.AB_TESTING_RECO_DINAMICAS_SUMARIZADA</code></p>
+
+    <div class="insight-cards">
+
+      <div class="insight-card insight-pos">
+        <strong>IR (Interacted Rate): +0.52pp (3.43% → 3.95%, +15.2%)</strong>
+        <p>Señal positiva y consistente. Con ventana simétrica el delta se modera respecto al análisis asimétrico (+0.70pp con PRE desde enero), lo que confirma que parte del efecto anterior capturaba tendencia pre-existente. <strong>Caveat metodológico:</strong> el análisis ITS sugiere una tendencia creciente en IR previa al encendido — el lift neto atribuible al experimento podría ser menor al +0.52pp.</p>
+      </div>
+
+      <div class="insight-card insight-neg">
+        <strong>CTR (Click-through Rate en recos): −0.10pp (0.71% → 0.61%, −14.1%)</strong>
+        <p>Negativo, explicado por el efecto de <strong>reach expansion</strong>: el reach de recos pasó a 95%+ en POST. El denominador (viewers) creció más rápido que los clicks, diluyendo la tasa aunque los clicks absolutos no caigan. No indica recos menos relevantes.</p>
+      </div>
+
+      <div class="insight-card insight-pos">
+        <strong>CVR (Conversion Rate): +3.67pp (13.98% → 17.65%, +26.3%) — señal más sólida</strong>
+        <p>Con ventana simétrica el baseline de PRE es prácticamente idéntico al análisis asimétrico (13.98% vs 14.02%), lo que confirma que el aumento de CVR es robusto y no depende de la longitud del PRE. <strong>Caveat:</strong> bajo volumen de clicks en la card principal — el test estadístico sigue sin tener poder suficiente para ser concluyente.</p>
+      </div>
+
+      <div class="insight-card" style="background:#f0f4ff; border-left: 3px solid #3a5cc5;">
+        <strong style="color:#3a5cc5;">Driver del CVR: PUSH_AUTOMATIC_PRICING</strong>
+        <p>Con ventana simétrica: CVR PRE=6.25% (160 clicks, 10 attr) → CVR POST=17.72% (237 clicks, 42 attr). El delta es aún más limpio que con ventana asimétrica (+11.47pp vs +12.15pp). Los clicks crecen de 160 a 237 y las atribuciones se cuadruplican (10→42). El aumento no es de volumen sino de calidad de conversión. Parte del CVR global también sube por <strong>efecto composición</strong>: PUSH gana share relativo porque OPPORTUNITY_CDP_MLB (CVR=0%) sigue sin atribuir.</p>
+      </div>
+
+      <div class="insight-card insight-warn">
+        <strong>OPPORTUNITY_CDP_MLB: CTR alto, CVR cero en ambos períodos</strong>
+        <p>CTR estable ~2.6% (2do card por clicks), atribuciones = 0 en PRE y POST. El problema es estructural e independiente del experimento. Requiere análisis separado de la lógica de atribución o del journey.</p>
+      </div>
+
+      <div class="insight-card" style="background:#f5f5f5; border-left: 3px solid #888;">
+        <strong style="color:#555;">Por sub-cluster (ventana simétrica)</strong>
+        <p>
+          <strong>Mature</strong>: IR +0.83pp | CTR −0.43pp | CVR 6.80%→22.22% — cluster más impactado en conversión (+15.42pp).<br>
+          <strong>Emerging</strong>: IR +0.37pp | CTR +0.12pp | CVR 16.09%→16.16% — estable.<br>
+          <strong>MeliPro</strong>: IR +0.43pp | CTR −0.98pp | CVR 0%→3.85% — CTR más castigado (era el más alto en PRE, se diluyó con reach expansion).<br>
+          <strong>In professionalization</strong>: IR −0.30pp | CTR +0.33pp | CVR 29.17%→20.00% — único con IR y CVR negativos. CVR PRE alto (29.17%) sugiere que este cluster tenía conversiones concentradas en el PRE reciente; en POST no mantiene ese ritmo.
+        </p>
+      </div>
+
+      <div class="insight-card" style="background:#f5f5f5; border-left: 3px solid #888;">
+        <strong style="color:#555;">Análisis de sellers que convirtieron en PUSH_AUTOMATIC_PRICING</strong>
+        <p>
+          18 nuevos conversores en POST (no habían convertido en PRE) | 12 perdidos | 1 consistente | 185 nunca convirtieron.<br>
+          15 de los 18 nuevos conversores <strong>ya habían visto la card en PRE sin clickear</strong> — exposición previa sin conversión, algo cambió en POST. Causa exacta desconocida.
+        </p>
+      </div>
+
+      <div class="insight-card insight-pos">
+        <strong>Conclusión general</strong>
+        <p>La ventana simétrica refuerza la robustez del análisis: IR sube +15.2% (modera el efecto de tendencia pre-existente), CVR tiene la señal más sólida (+26.3%) con baseline prácticamente idéntico, CTR negativo explicado por reach expansion. El cluster más beneficiado es <strong>Mature</strong> (+15.42pp CVR). <strong>In professionalization</strong> muestra CVR negativo con ventana simétrica — novedad respecto al análisis anterior. <strong>PUSH_AUTOMATIC_PRICING</strong> sigue siendo el principal driver de conversión; <strong>OPPORTUNITY_CDP_MLB</strong> requiere revisión separada.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECCIÓN: RESUMEN GLOBAL -->
+  <section>
+    <h2>Grupo Tratamiento: PRE vs POST Encendido (corte 17-Mar-2026)</h2>
+    <p class="section-intro">Ventana simétrica: PRE 4-Feb–16-Mar (41 días); POST 17-Mar–26-Apr (41 días). Panel balanceado: 5,401 sellers activos en ambos períodos.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Métrica</th>
+          <th>PRE (4-Feb – 16-Mar)</th>
+          <th>POST (17-Mar – 26-Apr)</th>
+          <th>Diferencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sellers activos</td><td>5,401</td><td>5,401</td>
+          <td><span class="diff-cell diff-neu">— (panel balanceado)</span></td>
+        </tr>
+        <tr>
+          <td>Interacted Rate (%)</td><td>3.43%</td><td>3.95%</td>
+          <td><span class="diff-cell diff-pos">+0.52 pp (+15.2%)</span></td>
+        </tr>
+        <tr>
+          <td>CTR Recos (%)</td><td>0.71%</td><td>0.61%</td>
+          <td><span class="diff-cell diff-neg">−0.10 pp (−14.1%)</span></td>
+        </tr>
+        <tr>
+          <td>CVR Recos (%)</td><td>13.98%</td><td>17.65%</td>
+          <td><span class="diff-cell diff-pos">+3.67 pp (+26.3%)</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SECCIÓN: BREAKDOWN POR CARD -->
+  <section>
+    <h2>Breakdown por Card — CTR y CVR con volúmenes absolutos</h2>
+    <p class="section-intro">Ventana simétrica (41 días PRE / 41 días POST). Panel balanceado (5,401 sellers del experimento). Cards con ≥5 clicks en algún período. Ordenado por clicks POST desc. CVR POST puede estar levemente subestimado en los últimos 8 días (19-Apr a 26-Apr).</p>
+
+    <div style="overflow-x: auto;">
+      <table style="font-size: 12px; min-width: 960px;">
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align:left; vertical-align:bottom;">Card</th>
+            <th colspan="5" style="text-align:center; border-bottom: 1px solid #3a4a6a; padding-bottom:4px;">PRE (4-Feb – 16-Mar)</th>
+            <th colspan="5" style="text-align:center; border-bottom: 1px solid #3a4a6a; padding-bottom:4px;">POST (17-Mar – 26-Apr)</th>
+          </tr>
+          <tr>
+            <th>Views</th><th>Clicks</th><th>Attr.</th><th>CTR %</th><th>CVR %</th>
+            <th>Views</th><th>Clicks</th><th>Attr.</th><th>CTR %</th><th>CVR %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#e6f4ed;">
+            <td style="font-weight:600; color:#1a7a4a;">PUSH_AUTOMATIC_PRICING ↑</td>
+            <td>74,118</td><td>160</td><td>10</td><td>0.22%</td><td>6.25%</td>
+            <td>105,731</td><td>237</td><td><strong>42</strong></td><td>0.22%</td><td><strong style="color:#1a7a4a;">17.72%</strong></td>
+          </tr>
+          <tr style="background:#fff8e1;">
+            <td style="font-weight:600; color:#856404;">OPPORTUNITY_CDP_MLB ⚠</td>
+            <td>5,939</td><td>154</td><td>0</td><td>2.59%</td><td style="color:#c0392b;">0%</td>
+            <td>4,104</td><td>109</td><td>0</td><td>2.66%</td><td style="color:#c0392b;">0%</td>
+          </tr>
+          <tr><td>ACTIVATE_FLEX_SHIPPING</td><td>4,403</td><td>138</td><td>93</td><td>3.13%</td><td>67.39%</td><td>10,659</td><td>223</td><td>120</td><td>2.09%</td><td>53.81%</td></tr>
+          <tr><td>MIPAGINA_CUPON_SEGUIDORES</td><td>36,595</td><td>182</td><td>43</td><td>0.50%</td><td>23.63%</td><td>8,053</td><td>100</td><td>47</td><td>1.24%</td><td>47.00%</td></tr>
+          <tr><td>CREDIT_PLUS</td><td>127,677</td><td>177</td><td>15</td><td>0.14%</td><td>8.47%</td><td>126,723</td><td>127</td><td>16</td><td>0.10%</td><td>12.60%</td></tr>
+          <tr><td>MIPAGINA_NUEVO_SEGUIDOR</td><td>29,496</td><td>157</td><td>25</td><td>0.53%</td><td>15.92%</td><td>3,936</td><td>53</td><td>11</td><td>1.35%</td><td>20.75%</td></tr>
+          <tr><td>MIPAGINA_OFERTA_RELAMPAGO</td><td>12,809</td><td>100</td><td>0</td><td>0.78%</td><td style="color:#c0392b;">0%</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><td>DEALS_TIER_1</td><td>3,085</td><td>93</td><td>13</td><td>3.01%</td><td>13.98%</td><td>4,180</td><td>89</td><td>6</td><td>2.13%</td><td>6.74%</td></tr>
+          <tr><td>SADS_LIMBO_GENERAL_ML_ADS</td><td>29,979</td><td>97</td><td>0</td><td>0.32%</td><td style="color:#c0392b;">0%</td><td>31,034</td><td>33</td><td>0</td><td>0.11%</td><td style="color:#c0392b;">0%</td></tr>
+          <tr><td>INCOMPLETE_TECHNICAL_SPECIFICATION</td><td>1,484</td><td>76</td><td>51</td><td>5.12%</td><td>67.11%</td><td>2,413</td><td>79</td><td>37</td><td>3.27%</td><td>46.84%</td></tr>
+          <tr><td>DEALS_TIER_2</td><td>1,193</td><td>46</td><td>6</td><td>3.86%</td><td>13.04%</td><td>2,470</td><td>58</td><td>10</td><td>2.35%</td><td>17.24%</td></tr>
+          <tr><td>PREMIUM_LISTING_TYPE</td><td>3,784</td><td>55</td><td>29</td><td>1.45%</td><td>52.73%</td><td>4,570</td><td>37</td><td>21</td><td>0.81%</td><td>56.76%</td></tr>
+          <tr><td>FREE_SHIPPING_OFFER</td><td>4,392</td><td>56</td><td>29</td><td>1.28%</td><td>51.79%</td><td>9,643</td><td>54</td><td>20</td><td>0.56%</td><td>37.04%</td></tr>
+          <tr><td>SHORTS_MODIFY_ITEM</td><td>7,309</td><td>43</td><td>20</td><td>0.59%</td><td>46.51%</td><td>11,402</td><td>62</td><td>29</td><td>0.54%</td><td>46.77%</td></tr>
+          <tr><td>UPSELLING_CAMPAIGN_ML_ADS</td><td>26,796</td><td>44</td><td>0</td><td>0.16%</td><td style="color:#c0392b;">0%</td><td>25,135</td><td>39</td><td>0</td><td>0.16%</td><td style="color:#c0392b;">0%</td></tr>
+          <tr><td>BUYBOX_STATUS_ELEGIBLE</td><td>2,380</td><td>38</td><td>18</td><td>1.60%</td><td>47.37%</td><td>2,783</td><td>44</td><td>15</td><td>1.58%</td><td>34.09%</td></tr>
+          <tr><td>BIDDING_CAMPAIGN_ML_ADS</td><td>9,466</td><td>52</td><td>0</td><td>0.55%</td><td style="color:#c0392b;">0%</td><td>9,880</td><td>39</td><td>0</td><td>0.39%</td><td style="color:#c0392b;">0%</td></tr>
+          <tr><td>BAD_SHOPPING_EXPERIENCE</td><td>798</td><td>21</td><td>11</td><td>2.63%</td><td>52.38%</td><td>2,111</td><td>27</td><td>14</td><td>1.28%</td><td>51.85%</td></tr>
+          <tr><td>BUY_BOX_LOSING_BY_PRICE</td><td>2,325</td><td>22</td><td>8</td><td>0.95%</td><td>36.36%</td><td>2,757</td><td>24</td><td>8</td><td>0.87%</td><td>33.33%</td></tr>
+          <tr><td>REPUTATION_RECOVERY_COLOR</td><td>4,052</td><td>20</td><td>6</td><td>0.49%</td><td>30.00%</td><td>3,819</td><td>18</td><td>7</td><td>0.47%</td><td>38.89%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="insight-cards" style="margin-top: 20px;">
+      <div class="insight-card insight-pos">
+        <strong>PUSH_AUTOMATIC_PRICING — señal más clara, confirmada con ventana simétrica</strong>
+        <p>Clicks crecen (160→237) y atribuciones se cuadruplican (10→42). CVR 6.25%→17.72% (+11.47pp). El delta es consistente con el análisis asimétrico, confirmando que el efecto no depende de la longitud de la ventana PRE.</p>
+      </div>
+      <div class="insight-card insight-warn">
+        <strong>OPPORTUNITY_CDP_MLB — problema estructural</strong>
+        <p>CTR estable ~2.6%, atribuciones = 0 en PRE y POST. Independiente del experimento y de la ventana elegida. Requiere revisión de la lógica de atribución o del journey.</p>
+      </div>
+      <div class="insight-card" style="background:#f5f5f5; border-left: 3px solid #888;">
+        <strong style="color:#555;">Otros patrones relevantes</strong>
+        <p>
+          <strong>DEALS_TIER_1:</strong> CTR cayó (3.01%→2.13%) y CVR también (13.98%→6.74%) — solo 6 atribuciones POST vs 13 PRE. Señal negativa con ventana simétrica.<br><br>
+          <strong>MIPAGINA_OFERTA_RELAMPAGO:</strong> desaparece del POST con ventana simétrica — menos de 5 clicks POST, sugiere que la card se apagó o cambió su audiencia.<br><br>
+          <strong>ACTIVATE_FLEX_SHIPPING:</strong> CVR muy alto en ambos períodos (67%→54%). Views casi duplicaron en POST, CTR cayó por dilución. El volumen de atribuciones sigue siendo el más alto del panel (120 en POST).
+        </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div><!-- /tab-resultados -->
+
 <footer id="footer-el">
   Fuente: <code>meli-sbox.SUPPLYDATA.AB_TESTING_RECO_DINAMICAS_SUMARIZADA</code> &nbsp;|&nbsp;
   Grupo Tratamiento (TESTING_FLG=TRUE) &nbsp;|&nbsp; Panel balanceado
@@ -217,8 +417,8 @@
 <div class="chart-tooltip" id="chart-tooltip"></div>
 
 <script>
-var rows1 = __RECO_DATA__;
-var rows2 = __CLUSTER_DATA__;
+var DATA_URL_1 = 'https://nquisamas-ml.github.io/recos_dinamicas/data/reco_dinamicas_data.json';
+var DATA_URL_2 = 'https://nquisamas-ml.github.io/recos_dinamicas/data/reco_dinamicas_cluster.json';
 var MAIN_CLUSTERS = ['Mature', 'Emerging', 'MeliPro', 'In professionalization'];
 
 var CLUSTER_COLORS = {
@@ -251,7 +451,7 @@ function diffCell(pre, post) {
   return '<span class="diff-cell ' + cls + '">' + sign + fmt(diff) + ' pp (' + sign + pctChange + '%)</span>';
 }
 
-function buildMainTable(data, updatedAt, minDate) {
+function buildMainTable(data, updatedAt) {
   var pre = data.find(function(r) { return r.periodo === 'PRE' && r.sub_cluster === 'TOTAL'; });
   var post = data.find(function(r) { return r.periodo === 'POST' && r.sub_cluster === 'TOTAL'; });
   if (!pre && !post) return '';
@@ -266,12 +466,9 @@ function buildMainTable(data, updatedAt, minDate) {
   ];
   var dateParts = updatedAt.split('-'); var maxDay = parseInt(dateParts[2], 10);
   var postDays = maxDay - 17 + 1; var sellersPanel = post ? fmtInt(post.sellers) : (pre ? fmtInt(pre.sellers) : '—');
-  var preStart = minDate ? new Date(minDate) : new Date('2026-01-01'); var preEnd = new Date('2026-03-16');
-  var preDays = Math.round((preEnd - preStart) / (1000 * 60 * 60 * 24)) + 1;
-  var preStartStr = preStart.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
   var html = '<section>';
   html += '<h2>1. Grupo Tratamiento: PRE vs POST Encendido (corte 17-Mar-2026)</h2>';
-  html += '<p class="section-intro">Comparacion acumulada del grupo Tratamiento antes y despues del encendido. Panel balanceado: solo sellers activos en ambos periodos. PRE: ' + preStartStr + ' hasta 16-Mar (' + preDays + ' dias); POST: 17–' + maxDay + ' Mar (' + postDays + ' dias). Sellers en panel: ' + sellersPanel + '.</p>';
+  html += '<p class="section-intro">Comparacion acumulada del grupo Tratamiento antes y despues del encendido. Panel balanceado: solo sellers activos en ambos periodos. PRE: 1–16 Mar (16 dias); POST: 17–' + maxDay + ' Mar (' + postDays + ' dias). Sellers en panel: ' + sellersPanel + '.</p>';
   html += '<table><thead><tr><th>Metrica</th><th>PRE (&lt; 17-Mar)</th><th>POST (≥ 17-Mar)</th><th>Diferencia</th></tr></thead><tbody>';
   metrics.forEach(function(m) { html += '<tr><td>' + m.name + '</td><td>' + m.preVal + '</td><td>' + m.postVal + '</td><td>' + m.diff + '</td></tr>'; });
   html += '</tbody></table><p class="kpi-note">* Verde: mejora en POST. Amarillo: metrica no calculable por ventana de atribucion incompleta.</p>';
@@ -607,9 +804,17 @@ function renderSection4() {
   updateS4Extras(keys, {tratIr:tratIr,ctrlIr:ctrlIr,tratCtr:tratCtr,ctrlCtr:ctrlCtr,tratCvr:tratCvr,ctrlCvr:ctrlCvr,tIrN:tIrN,tIrD:tIrD,cIrN:cIrN,cIrD:cIrD,tCtrN:tCtrN,tCtrD:tCtrD,cCtrN:cCtrN,cCtrD:cCtrD,tCvrN:tCvrN,tCvrD:tCvrD,cCvrN:cCvrN,cCvrD:cCvrD});
 }
 
-// ── MAIN: renderizado con datos embebidos ────────────────────────────────────
-function render() {
+// ── MAIN: fetch ambos JSONs en paralelo ───────────────────────────────────────
+async function render() {
   try {
+    var [resp1, resp2] = await Promise.all([fetch(DATA_URL_1), fetch(DATA_URL_2)]);
+    if (!resp1.ok) throw new Error('JSON 1: HTTP ' + resp1.status);
+    if (!resp2.ok) throw new Error('JSON 2: HTTP ' + resp2.status);
+    var text1 = await resp1.text();
+    var text2 = await resp2.text();
+    var rows1 = text1.trim().split('\n').map(function(l) { return JSON.parse(l); });
+    var rows2 = text2.trim().split('\n').map(function(l) { return JSON.parse(l); });
+
     var availableClusters = [], seen = {};
     rows1.forEach(function(r) { if (r.sub_cluster !== 'TOTAL' && r.sellers > 10 && !seen[r.sub_cluster]) { availableClusters.push(r.sub_cluster); seen[r.sub_cluster] = true; } });
     var clusters = MAIN_CLUSTERS.filter(function(c) { return availableClusters.indexOf(c) !== -1; });
@@ -617,12 +822,11 @@ function render() {
     var allClusters = clusters.concat(others);
 
     var updatedAt = rows1[0] && rows1[0].updated_at ? rows1[0].updated_at : 'N/A';
-    var minDate = rows1[0] && rows1[0].min_date ? rows1[0].min_date : null;
     var clusterUpdated = rows2[0] && rows2[0].ultima_actualizacion ? String(rows2[0].ultima_actualizacion) : updatedAt;
     document.getElementById('header-date').innerHTML = 'Datos actualizados al: <strong>' + clusterUpdated + '</strong>';
 
     var html = '';
-    html += buildMainTable(rows1, updatedAt, minDate);
+    html += buildMainTable(rows1, updatedAt);
     html += buildSubclusterTable(rows1, allClusters);
     html += buildCharts(rows1, allClusters);
 
@@ -644,11 +848,19 @@ function render() {
       'Grupo Tratamiento (TESTING_FLG=TRUE) &nbsp;|&nbsp; Panel balanceado';
 
   } catch (err) {
-    document.getElementById('loading').innerHTML = '<div class="error-msg">Error cargando datos: ' + err.message + '</div>';
+    document.getElementById('loading').innerHTML = '<div class="error-msg">Error cargando datos: ' + err.message + '<br><small>' + DATA_URL_1 + '</small></div>';
   }
 }
 
 render();
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelector('[onclick="switchTab(\''+tab+'\')"]').classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
 </script>
 </body>
 </html>
